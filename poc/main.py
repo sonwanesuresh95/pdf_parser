@@ -7,9 +7,12 @@ from pypdf import PdfReader
 from docling.document_converter import DocumentConverter
 
 # --- PATH SETUP ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+current_file_dir = os.path.dirname(os.path.abspath(__file__))
+# Parent directory: apply dirname again
+BASE_DIR = os.path.dirname(current_file_dir)
+
 # IMPORTANT: Point this to your existing hf_cache folder
-EXISTING_CACHE = "/Users/sureshsonwane/Desktop/vscprojects/stage_1/hf_cache"
+EXISTING_CACHE = os.path.join(BASE_DIR, "hf_cache")
 os.environ["HF_HOME"] = EXISTING_CACHE
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -25,12 +28,13 @@ async def lifespan(app: FastAPI):
         del app.state.converter
 
 app = FastAPI(lifespan=lifespan)
-os.makedirs(os.path.join(BASE_DIR, "uploads"), exist_ok=True)
-app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+os.makedirs(os.path.join(current_file_dir, "uploads"), exist_ok=True)
+os.makedirs(os.path.join(current_file_dir, "static"), exist_ok=True)
+app.mount("/static", StaticFiles(directory=os.path.join(current_file_dir, "static")), name="static")
 
 @app.post("/compare")
 async def compare(request: Request, file: UploadFile = File(...)):
-    file_path = os.path.join(BASE_DIR, "uploads", file.filename)
+    file_path = os.path.join(current_file_dir, "uploads", file.filename)
     with open(file_path, "wb") as buffer: 
         shutil.copyfileobj(file.file, buffer)
     
@@ -54,7 +58,7 @@ async def compare(request: Request, file: UploadFile = File(...)):
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    with open(os.path.join(BASE_DIR, "static/index.html")) as f: 
+    with open(os.path.join(current_file_dir, "static/index.html")) as f: 
         return f.read()
 
 if __name__ == "__main__":

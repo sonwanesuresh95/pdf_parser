@@ -32,15 +32,11 @@ Prereqs:
 
 Install:
 ```sh
-pip install fastapi uvicorn pypdf docling reportlab
+pip install -r requirements.txt
 ```
 
 Run (dev):
 ```sh
-# point to local HF cache (optional but recommended)
-mkdir hf_cache
-export HF_HOME= ./hf_cache
-
 # from repo root
 python poc/main.py
 

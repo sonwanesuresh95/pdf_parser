@@ -1,8 +1,8 @@
-# 🚀 Document Parsing POC — Stage 1
+# 🚀 AI Document Parsing 
 
 Welcome to the shiny playground where old-school PDF text extraction meets layout-aware, AI-driven parsing. This repository demonstrates how a layout-first parser (Docling) can drastically improve fidelity for Retrieval-Augmented Generation (RAG) pipelines.
 
-Think of this as: pypdf vs. Docling — a friendly duel to see who understands a document better.
+![](https://github.com/sonwanesuresh95/pdf_parser/blob/main/ss.png)
 
 ---
 
@@ -21,7 +21,6 @@ Think of this as: pypdf vs. Docling — a friendly duel to see who understands a
 - [docling_pdf_parsing.py](docling_pdf_parsing.py) — Docling demo usage
 - [extreme_pdf_generator.py](extreme_pdf_generator.py), complex_pdf_generator.py — synthetic PDFs to break parsers
 - [report_stage_1.md](report_stage_1.md), [report2_stage_1.md](report2_stage_1.md) — quick findings & notes
-- [hf_cache/](hf_cache) — (local) Hugging Face cache for models
 
 ---
 
@@ -75,7 +74,6 @@ export HF_HOME=/path/to/other/cache && pkill -f uvicorn && uvicorn poc.main:app 
    - pypdf extraction (plain text, page-wise)
    - Docling extraction (structure, tables, metadata → Markdown)
 3. UI shows both results and timing metrics for quick comparison
-
 
 ---
 

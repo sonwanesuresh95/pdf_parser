@@ -11,7 +11,11 @@ current_file_dir = os.path.dirname(os.path.abspath(__file__))
 # Parent directory: apply dirname again
 BASE_DIR = os.path.dirname(current_file_dir)
 
+os.makedirs(os.path.join(current_file_dir, "uploads"), exist_ok=True)
+os.makedirs(os.path.join(current_file_dir, "static"), exist_ok=True)
+
 # IMPORTANT: Point this to your existing hf_cache folder
+os.makedirs(os.path.join(BASE_DIR, "hf_cache"), exist_ok=True)
 EXISTING_CACHE = os.path.join(BASE_DIR, "hf_cache")
 os.environ["HF_HOME"] = EXISTING_CACHE
 

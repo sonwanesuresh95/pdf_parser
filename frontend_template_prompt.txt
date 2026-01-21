@@ -1,0 +1,9 @@
+"Build a frontend POC using Tailwind CSS with a Modern Enterprise SaaS aesthetic. Use a Slate and Indigo color palette.
+Key Styles to include:
+Background: Use bg-slate-50 for the page and bg-white for primary cards.
+Typography: Use font-black tracking-tight for main headings in slate-800. Use ui-monospace for data/code blocks.
+Cards: Use rounded-2xl for containers with shadow-sm and subtle border-slate-200.
+Headers: Every card should have a distinct header with bg-slate-50 and a border-b.
+Accents: Use Indigo-600 for primary buttons and status indicators.
+Interaction: Include Font Awesome icons, smooth transitions, and animate-pulse for loading states.
+Layout: A clean, responsive grid (usually 2 columns) with wide gutters."

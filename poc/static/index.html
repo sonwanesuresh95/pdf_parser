@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RAG Step 1: Parsing POC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .code-view { 
+            height: 65vh; 
+            font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            tab-size: 4;
+            white-space: pre; 
+            overflow: auto;   
+        }
+
+        .fullscreen-mode {
+            position: fixed !important;
+            top: 0; left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999;
+            background: white;
+            padding: 2rem;
+        }
+        
+        #doclingOut, #tradOut {
+            transition: font-size 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <div class="max-w-7xl mx-auto py-8 px-4" id="mainContainer">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">Document Parsing POC</h1>
+                <p class="text-slate-500">Standard Extraction vs. Layout-Aware Parsing</p>
+            </div>
+            
+            <div class="flex items-center space-x-3 bg-white p-3 rounded-2xl shadow-sm border border-slate-200">
+                <input type="file" id="pdfFile" accept="application/pdf" class="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                <button onclick="process()" id="btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-xl transition flex items-center">
+                    <i class="fas fa-microchip mr-2"></i> Parse
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Traditional Panel -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col" id="tradPanel">
+                <div class="bg-slate-50 border-b px-5 py-3 flex justify-between items-center">
+                    <span class="text-slate-700 font-bold text-xs uppercase tracking-widest">Traditional (pypdf)</span>
+                    <button onclick="toggleFS('tradPanel')" class="text-slate-400 hover:text-indigo-600"><i class="fas fa-expand"></i></button>
+                </div>
+                <div class="relative">
+                    <div id="tradOut" class="code-view p-5 text-slate-600">
+                        <p class="text-slate-400 italic">No data yet...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Docling Panel -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col" id="doclingPanel">
+                <div class="bg-indigo-50/50 border-b border-indigo-100 px-5 py-3 flex justify-between items-center">
+                    <span class="text-indigo-700 font-bold text-xs uppercase tracking-widest">Docling Parser (AI-Based)</span>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex bg-white rounded-lg border text-xs">
+                            <button onclick="changeZoom('doclingOut', -1)" class="px-2 py-1 border-r hover:bg-slate-50">-</button>
+                            <span class="px-2 py-1 bg-slate-50 font-bold" id="zoomLevel">100%</span>
+                            <button onclick="changeZoom('doclingOut', 1)" class="px-2 py-1 hover:bg-slate-50">+</button>
+                        </div>
+                        <button onclick="toggleFS('doclingPanel')" class="text-indigo-400 hover:text-indigo-600">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div id="doclingOut" class="code-view p-5 text-slate-800">
+                        <p class="text-slate-400 italic">Awaiting document analysis...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="metrics" class="mt-6 text-center text-xs text-slate-400 font-medium"></div>
+    </div>
+
+    <script>
+        let currentZoom = 13;
+
+        async function process() {
+            const fileInput = document.getElementById('pdfFile');
+            const btn = document.getElementById('btn');
+            if (!fileInput.files[0]) return alert("Please select a PDF!");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Parsing...';
+            
+            const tradDiv = document.getElementById('tradOut');
+            const doclingDiv = document.getElementById('doclingOut');
+            tradDiv.innerHTML = '<p class="animate-pulse">Running text extraction...</p>';
+            doclingDiv.innerHTML = '<p class="animate-pulse text-indigo-600 font-bold">Docling is analyzing structure, tables, and metadata...</p>';
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/compare', { method: 'POST', body: formData });
+                const data = await response.json();
+
+                tradDiv.innerText = data.traditional;
+                doclingDiv.innerText = data.docling;
+                
+                document.getElementById('metrics').innerHTML = 
+                    `Processing Time: Traditional: <span class="text-slate-600">${data.metrics.trad_time}</span> | ` +
+                    `Docling Parser: <span class="text-indigo-600 font-bold">${data.metrics.docling_time}</span>`;
+
+            } catch (e) {
+                alert("Processing failed! Check terminal logs.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-microchip mr-2"></i> Compare';
+            }
+        }
+
+        function changeZoom(targetId, delta) {
+            currentZoom += delta;
+            if (currentZoom < 8) currentZoom = 8;
+            if (currentZoom > 24) currentZoom = 24;
+            document.getElementById(targetId).style.fontSize = currentZoom + 'px';
+            document.getElementById('zoomLevel').innerText = Math.round((currentZoom/13)*100) + '%';
+        }
+
+        function toggleFS(panelId) {
+            const panel = document.getElementById(panelId);
+            const isFS = panel.classList.contains('fullscreen-mode');
+            
+            document.getElementById('doclingPanel').classList.remove('fullscreen-mode');
+            document.getElementById('tradPanel').classList.remove('fullscreen-mode');
+            
+            if (!isFS) {
+                panel.classList.add('fullscreen-mode');
+                panel.querySelector('.code-view').style.height = '85vh';
+            } else {
+                panel.querySelector('.code-view').style.height = '65vh';
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") {
+                document.getElementById('doclingPanel').classList.remove('fullscreen-mode');
+                document.getElementById('tradPanel').classList.remove('fullscreen-mode');
+            }
+        });
+    </script>
+</body>
+</html>

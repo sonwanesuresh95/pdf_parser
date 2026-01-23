@@ -31,7 +31,7 @@ Prereqs:
 
 Install:
 ```sh
-pip install -r requirements.txt
+pip install fastapi uvicorn pypdf docling reportlab
 ```
 
 Run (dev):
